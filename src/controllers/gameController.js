@@ -2,7 +2,8 @@ import connection from "../bdStrategy/postGres.js";
 
 
 export async function getGames(req, res){
-    const alou = await connection.query('SELECT * FROM games')
+    const alou = await connection.query('SELECT games.*, categories.name as "categoryName" FROM games JOIN categories ON "categoryId"=categories.id')
+    console.log(alou.rows)
     res.status(201).send(alou.rows)
 }
 
