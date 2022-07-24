@@ -2,18 +2,32 @@ import connection from "../bdStrategy/postGres.js";
 import dayjs from 'dayjs';
 
 export async function getRental(req, res){
-    const {rows} = await connection.query(`
-    SELECT rentals.*, customers.name as "nameCustomer", games.*, categories.name as categoryName
-    FROM customers 
-    JOIN rentals ON rentals."customerId"=customers.id
-    JOIN games ON rentals."gameId"=games.id
-    JOIN categories ON categories.id=games."categoryId"
-    `)
-    let array = rows.map(row =>{
-        return formatObject(row)
-    })
+    const {customerId} = req.query;
 
-    res.status(201).send(array)
+    const {rows} = await connection.query(`
+        SELECT rentals.*, customers.name as "nameCustomer", games.*, categories.name as categoryName
+        FROM customers 
+        JOIN rentals ON rentals."customerId"=customers.id
+        JOIN games ON rentals."gameId"=games.id
+        JOIN categories ON categories.id=games."categoryId"
+        `)
+
+        let array = rows.map(row =>{
+            return formatObject(row)
+        })
+
+    if(!req.query.customerId){
+    
+        res.status(201).send(array)
+        
+    }else{
+        const arrayFiltrada = array.filter(row => row.customerId == customerId)
+
+        res.status(201).send(arrayFiltrada)
+    }
+
+    
+    
 }
 
 export async function postRental(req, res){

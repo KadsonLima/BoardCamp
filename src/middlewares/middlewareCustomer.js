@@ -2,7 +2,6 @@ import Joi from "joi"
 import { customerValidate } from "../schema/schemaCustomers.js"
 
 export async function customerVerify(req, res, next){
-    console.log("ASOUASODUASOD", req.body)
 
     try {
     
