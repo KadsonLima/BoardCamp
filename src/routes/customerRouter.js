@@ -1,15 +1,15 @@
 import { Router } from "express";
 import { getCustomers, postCustomers , getCustomer, updateCustomer} from "../controllers/customerController.js";
-import { customerVerify } from "../middlewares/middlewareCustomer.js";
+import { validateCustomer } from "../middlewares/customerValidator.js";
 
 
 const customersRouter = Router();
 
 
 customersRouter.get('/customers', getCustomers);
-customersRouter.post('/customers',customerVerify, postCustomers);
 customersRouter.get('/customers/:id', getCustomer);
-customersRouter.put('/customers/:id', updateCustomer);
+customersRouter.post('/customers',validateCustomer, postCustomers);
+customersRouter.put('/customers/:id',validateCustomer, updateCustomer);
 
 
 export default customersRouter;

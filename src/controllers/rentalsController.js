@@ -33,8 +33,6 @@ export async function getRental(req, res){
 export async function postRental(req, res){
     const {customerId, gameId, daysRented} = req.body;
 
-    
-
     const dataAlugado = dayjs().format('YYYY-MM-DD');
 
     const {rows} = await connection.query(`SELECT games."pricePerDay" FROM games WHERE games.id=${gameId}`)
@@ -50,10 +48,33 @@ export async function postRental(req, res){
     }
 }
 
+export async function complete(req, res){
+
+}
+
 export async function deleteRental(req, res){
-    console.log("delete", req.params, req.body)
+    const {id} = req.params;
+
+    try {
+        await connection.query(`DELETE FROM rentals WHERE id = $1`, [id]);
+
+    } catch (error) {
+        res.sendStatus(500);
+    }
+
     res.sendStatus(200)
 }
+
+
+
+
+
+
+
+
+
+
+
 function formatObject(row) {
     const {
       id, customerId, gameId,
