@@ -5,7 +5,7 @@ export async function getRental(req, res){
     const {customerId} = req.query;
 
     const {rows} = await connection.query(`
-        SELECT rentals.*, customers.name as "nameCustomer", games.*, categories.name as categoryName
+        SELECT rentals.*, customers.name as "nameCustomer", games.name , categories.name as categoryName
         FROM customers 
         JOIN rentals ON rentals."customerId"=customers.id
         JOIN games ON rentals."gameId"=games.id
@@ -19,7 +19,7 @@ export async function getRental(req, res){
     if(!req.query.customerId){
     
         res.status(201).send(array)
-        
+        console.log(rows)
     }else{
         const arrayFiltrada = array.filter(row => row.customerId == customerId)
 
@@ -33,7 +33,7 @@ export async function getRental(req, res){
 export async function postRental(req, res){
     const {customerId, gameId, daysRented} = req.body;
 
-    const dataAlugado = dayjs().format('YYYY-MM-DD');
+    
 
     const {rows} = await connection.query(`SELECT games."pricePerDay" FROM games WHERE games.id=${gameId}`)
     
@@ -49,7 +49,37 @@ export async function postRental(req, res){
 }
 
 export async function complete(req, res){
+    const {id} = req.params;
+  try {
+    const result = await connection.query(`SELECT * FROM rentals WHERE id = $1`, [id]);
+    if(result.rowCount === 0) return res.sendStatus(404); 
+    
+    const rental = result.rows[0];
+    if(rental.returnDate) return res.sendStatus(400);
+    else {
+      const diff = new Date().getTime() - new Date(rental.rentDate).getTime();
+      const diffInDays = Math.floor(diff / (24 * 3600 * 1000));
 
+      let delayFee = 0;
+      if (diffInDays > rental.daysRented) {
+        const addicionalDays = diffInDays - rental.daysRented;
+        delayFee = addicionalDays * rental.originalPrice;
+        console.log("delayFee", addicionalDays);
+      };
+
+      
+      await connection.query(`
+        UPDATE rentals 
+        SET "returnDate" = NOW(), "delayFee" = $1
+        WHERE id = $2    
+      `, [delayFee, id]);
+
+      res.sendStatus(200);
+    }
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500); // internal server error
+  }
 }
 
 export async function deleteRental(req, res){
