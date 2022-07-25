@@ -33,6 +33,8 @@ export async function getRental(req, res){
 export async function postRental(req, res){
     const {customerId, gameId, daysRented} = req.body;
 
+    
+
     const dataAlugado = dayjs().format('YYYY-MM-DD');
 
     const {rows} = await connection.query(`SELECT games."pricePerDay" FROM games WHERE games.id=${gameId}`)
@@ -40,7 +42,7 @@ export async function postRental(req, res){
     const priceRental = rows[0].pricePerDay*daysRented;
 
     try {
-        await connection.query('INSERT INTO rentals("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1,$2,$3,$4,$5,$6,$7)', [customerId, gameId, dataAlugado, daysRented, null, priceRental, null])
+        await connection.query('INSERT INTO rentals("customerId", "gameId", "rentDate", "daysRented", "returnDate", "originalPrice", "delayFee") VALUES ($1,$2, NOW(),$3,$4,$5,$6)', [customerId, gameId,  daysRented, null, priceRental, null])
         res.sendStatus(201);
     } catch (error) {
         console.log(error)
@@ -48,7 +50,10 @@ export async function postRental(req, res){
     }
 }
 
-
+export async function deleteRental(req, res){
+    console.log("delete", req.params, req.body)
+    res.sendStatus(200)
+}
 function formatObject(row) {
     const {
       id, customerId, gameId,
